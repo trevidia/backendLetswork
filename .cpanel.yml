@@ -2,4 +2,4 @@
 deployment:
   tasks:
     - export DEPLOYPATH=/home/trevdia/api.letworkbedone.com.ng/
-    - composer install
+    - /bin/composer install
