@@ -16,9 +16,9 @@ class CreateProductsTable extends Migration
         Schema::create('products', function (Blueprint $table) {
             $table->id();
             $table->foreignId('gig_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
-            $table->foreignId('basic_id')->constrained('package_id')->cascadeOnUpdate()->cascadeOnDelete();
-            $table->foreignId('standard_id')->nullable()->constrained('package_id')->cascadeOnUpdate()->nullOnDelete();
-            $table->foreignId('premium_id')->nullable()->constrained('package_id')->cascadeOnUpdate()->nullOnDelete();
+            $table->foreignId('basic_id')->constrained('packages')->cascadeOnUpdate()->cascadeOnDelete();
+            $table->foreignId('standard_id')->nullable()->constrained('packages')->cascadeOnUpdate()->nullOnDelete();
+            $table->foreignId('premium_id')->nullable()->constrained('packages')->cascadeOnUpdate()->nullOnDelete();
             $table->timestamps();
         });
     }

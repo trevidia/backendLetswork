@@ -169,6 +169,7 @@ return [
     */
 
     'secure' => env('SESSION_SECURE_COOKIE'),
+    //todo change the env to true when deploying
 
     /*
     |--------------------------------------------------------------------------
@@ -196,6 +197,6 @@ return [
     |
     */
 
-    'same_site' => 'lax',
+    'same_site' => null,
 
 ];

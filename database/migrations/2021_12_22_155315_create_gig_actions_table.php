@@ -15,6 +15,9 @@ class CreateGigActionsTable extends Migration
     {
         Schema::create('gig_actions', function (Blueprint $table) {
             $table->id();
+            $table->string('action_title');
+            $table->string('slug');
+            $table->foreignId('gig_status_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
             $table->timestamps();
         });
     }

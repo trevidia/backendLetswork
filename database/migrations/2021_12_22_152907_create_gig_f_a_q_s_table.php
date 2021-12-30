@@ -15,6 +15,9 @@ class CreateGigFAQSTable extends Migration
     {
         Schema::create('gig_f_a_q_s', function (Blueprint $table) {
             $table->id();
+            $table->string('question');
+            $table->string('answer');
+            $table->foreignId('gig_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
             $table->timestamps();
         });
     }

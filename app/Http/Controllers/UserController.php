@@ -56,7 +56,7 @@ class UserController extends Controller
         Auth::login($user);
         $loggedUser = Auth::user();
         $token = $loggedUser->createToken("token");
-        $cookie = cookie('jwt', $token->plainTextToken, 60 * 0.1);
+        $cookie = cookie('jwt', $token->plainTextToken, 60 * 24);
         return response(["userId"=> $loggedUser->id, "tokenId" => $token->accessToken->id, "message" => "success"])->withCookie($cookie);
     }
 

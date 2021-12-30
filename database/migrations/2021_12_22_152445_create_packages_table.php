@@ -16,7 +16,7 @@ class CreatePackagesTable extends Migration
         Schema::create('packages', function (Blueprint $table) {
             $table->id();
             $table->string('package_description');
-            $table->unsignedTinyInteger('days');
+            $table->unsignedTinyInteger('days_to_completion');
             $table->unsignedTinyInteger('revision_count');
             $table->integer('price');
             $table->timestamps();

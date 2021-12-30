@@ -15,6 +15,8 @@ class CreateGigTagsTable extends Migration
     {
         Schema::create('gig_tags', function (Blueprint $table) {
             $table->id();
+            $table->string('tag_title')->unique();
+            $table->foreignId('gig_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
             $table->timestamps();
         });
     }

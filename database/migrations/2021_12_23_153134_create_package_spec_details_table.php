@@ -15,6 +15,7 @@ class CreatePackageSpecDetailsTable extends Migration
     {
         Schema::create('package_spec_details', function (Blueprint $table) {
             $table->id();
+            // title of the table
             $table->string('spec');
             $table->string('package_spec_detail_value');
             $table->foreignId('package_spec_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();

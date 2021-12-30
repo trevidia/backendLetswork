@@ -15,6 +15,11 @@ class CreateGigGalleriesTable extends Migration
     {
         Schema::create('gig_galleries', function (Blueprint $table) {
             $table->id();
+            $table->string('image1_location');
+            $table->string('image2_location')->nullable();
+            $table->string('image3_location')->nullable();
+            $table->string('video_location')->nullable();
+            $table->foreignId('gig_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
             $table->timestamps();
         });
     }

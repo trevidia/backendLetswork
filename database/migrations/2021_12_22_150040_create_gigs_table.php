@@ -15,6 +15,13 @@ class CreateGigsTable extends Migration
     {
         Schema::create('gigs', function (Blueprint $table) {
             $table->id();
+            $table->string('title', 80);
+            $table->longText('description')->nullable();
+            $table->longText('requirements')->nullable();
+            $table->string('slug');
+            $table->foreignId('gig_status_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
+            $table->foreignId('sub_category_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
             $table->timestamps();
         });
     }

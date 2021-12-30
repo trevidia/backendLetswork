@@ -15,6 +15,8 @@ class CreateGigExtrasTable extends Migration
     {
         Schema::create('gig_extras', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('package_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
+            $table->foreignId('gig_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
             $table->timestamps();
         });
     }
