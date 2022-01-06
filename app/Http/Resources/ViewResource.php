@@ -4,7 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class GigStatusResource extends JsonResource
+class ViewResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -14,10 +14,6 @@ class GigStatusResource extends JsonResource
      */
     public function toArray($request)
     {
-        return [
-            'id' => $this->id,
-            'status' => $this->status,
-            'gigs' => GigResource::collection($this->whenLoaded('gigs')),
-        ];
+        return parent::toArray($request);
     }
 }

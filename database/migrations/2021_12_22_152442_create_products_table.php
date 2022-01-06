@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateGigExtrasTable extends Migration
+class CreateProductsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,9 @@ class CreateGigExtrasTable extends Migration
      */
     public function up()
     {
-        Schema::create('gig_extras', function (Blueprint $table) {
+        Schema::create('products', function (Blueprint $table) {
             $table->id();
-            $table->string('gig_extra_title');
-            $table->unsignedBigInteger('price');
-            $table->string('additional_days');
-            // it is a product that is why i am assigning it a product id
-            $table->foreignId('product_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
+            $table->string('product_title');
             $table->foreignId('gig_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
             $table->timestamps();
         });
@@ -32,6 +28,6 @@ class CreateGigExtrasTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('gig_extras');
+        Schema::dropIfExists('products');
     }
 }

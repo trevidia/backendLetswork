@@ -11,7 +11,7 @@ class GigStatusDetail extends Model
     use HasFactory;
 
     protected $fillable = [
-        'message', 'gig_id', 'gig_status_id'
+        'message', 'gig_id', 'status'
     ];
 
     public function gig(){

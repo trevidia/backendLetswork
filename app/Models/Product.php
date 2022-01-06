@@ -10,10 +10,10 @@ class Product extends Model
     use HasFactory;
 
     protected $fillable = [
-        'gig_id', 'basic_id', 'standard_id', 'premium_id'
+        'gig_id', 'product_title'
     ];
 
-    public function packages(){
-        return $this->hasMany(Packages::class);
+    public function package(){
+        return $this->hasOne(Packages::class);
     }
 }

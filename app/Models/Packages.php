@@ -14,6 +14,6 @@ class Packages extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'package_description','days_to_completion','revision_count','price',
+        'package_description','days_to_completion','revision_count','price','product_id'
     ];
 }

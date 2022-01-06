@@ -8,4 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class GigFAQ extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        'question', 'answer', 'gig_id'
+    ];
 }

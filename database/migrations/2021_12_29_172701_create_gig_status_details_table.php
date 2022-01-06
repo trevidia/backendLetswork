@@ -15,8 +15,8 @@ class CreateGigStatusDetailsTable extends Migration
     {
         Schema::create('gig_status_details', function (Blueprint $table) {
             $table->id();
+            $table->string('status');
             $table->string('message')->nullable();
-            $table->foreignId('gig_status_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
             $table->foreignId('gig_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
             $table->timestamps();
         });

@@ -19,6 +19,7 @@ class CreatePackagesTable extends Migration
             $table->unsignedTinyInteger('days_to_completion');
             $table->unsignedTinyInteger('revision_count');
             $table->integer('price');
+            $table->foreignId('product_id')->unique()->constrained()->cascadeOnUpdate()->cascadeOnDelete();
             $table->timestamps();
         });
     }

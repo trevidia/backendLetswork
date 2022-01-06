@@ -2,11 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\GigResource;
+use App\Http\Resources\GigStatusResource;
 use App\Models\Gig;
+use App\Models\User;
 use App\Models\GigStatus;
 use App\Models\GigStatusDetail;
 use App\Models\GigTags;
+use App\Models\Packages;
 use App\Models\PackageSpec;
+use App\Models\PackageSpecDetails;
+use App\Models\Product;
+use Error;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -23,7 +30,6 @@ class GigsController extends Controller
     public function create(Request $request)
     {
 
-            $gigStatus = GigStatus::where('status', 'draft')->first()->id;
         $gig = Gig::firstOrCreate([
             'title' => $request['gigTitle'],
             'sub_category_id' => $request['subCategoryId'],
@@ -31,25 +37,23 @@ class GigsController extends Controller
             'requirements'=> $request['requirements'],
             'slug' => Str::snake($request['gigTitle']),
             'user_id'=> $request['userId'],
-            'gig_status_id' => $gigStatus
         ]);
         GigStatusDetail::firstOrCreate(
             ['gig_id' => $gig->id],
-            ['gig_status_id' => $gigStatus
+            ['status' => 'draft'
         ]);
 
         $tags = $request['tags'];
         foreach ($tags as $tag){
-            GigTags::firstOrCreate(
-                ["tag_title" => $tag,],
-                ['gig_id' => $gig->id]
+            GigTags::create(
+                ["tag_title" => $tag, 'gig_id' => $gig->id]
             );
         }
         return response(["message" => "success", "gig_id"=>$gig->id]);
     }
 
      /**
-     * Logout the specified User Logged in.
+     *
      *
      * @param  \Illuminate\Http\Request  $request
      *
@@ -73,9 +77,183 @@ class GigsController extends Controller
         return response();
     }
 
-    public function proposalStatus(){
+    public function proposalStatus(Request $request, $id){
         //
+        $gig = User::find($id)->gigs()->with(['views', 'orders', 'product', 'statusDetails',])->get();
+        return response(GigResource::collection($gig));
 
+    }
+
+    public function view($gigId){
+
+        try{
+            $gig = Gig::find($gigId);
+            $response = [
+                "id" => $gig->id,
+                "title" => $gig->title,
+                "description" => $gig->description,
+                "requirements" => $gig->requirements,
+                "gigTags" => $gig->tags,
+                "packages" => $gig->packages,
+                "gallery" => $gig->gallery,
+                "subCategory"=>$gig->subCategory,
+                "status" => $gig->statusDetails->status,
+                "username" => $gig->user->username,
+                "attributes" => $gig->subCategory->specs
+        ];
+        return response($response);
+        }catch(Error $e){
+            return response(["message" => "Not Found"], 404);
+        }
+    }
+
+    public function updateGig(Request $request, $gigId){
+        $gig = Gig::find($gigId);
+        $gig->title = $request['gigTitle'] ?? $gig->title;
+        $gig->requirements = $request['requirements'] ?? $gig->requirements;
+        $gig->description = $request['description'] ?? $gig->description;
+        $gig->slug = $request['gigTitle'] != null ? Str::snake($request['gigTitle']) : $gig->slug ;
+        $tags = $request['tags'] ?? $gig->tags;
+
+        // if the count of the gig tags aren't zero then
+        // create tags after deleting them
+
+        if (count($tags) != 0 && $request['tags'] != null){
+            GigTags::where('gig_id', $gigId)->delete();
+            foreach ($tags as $tag){
+                GigTags::firstOrCreate(
+                    ["tag_title" => $tag, 'gig_id' => $gigId]
+                );
+            }
+        }
+
+        // if they are in the package form it should take the values
+        // and store them
+
+        $product = Product::whereIn('product_title', ["basic", "standard", "premium",])->get();
+
+        if ($request->basic != null && $request->standard != null && $request->premium != null){
+            $basicProduct = Product::firstOrCreate([
+                "gig_id" => $gig->id, "product_title" => "basic"
+            ]);
+            $premiumProduct = Product::firstOrCreate([
+                "gig_id" => $gig->id, "product_title" => "premium"
+            ]);
+            $standardProduct = Product::firstOrCreate([
+                "gig_id" => $gig->id, "product_title" => "standard"
+            ]);
+
+            Packages::upsert([
+            [
+                "package_description" => $request->basic["description"],
+                "days_to_completion" => $request->basic["delivery"],
+                "revision_count" => $request->basic["revision"],
+                "price" => $request->basic["price"],
+                "product_id" => $basicProduct->id
+            ],
+            [
+                "package_description" => $request->standard["description"],
+                "days_to_completion" => $request->standard["delivery"],
+                "revision_count" => $request->standard["revision"],
+                "price" => $request->standard["price"],
+                "product_id" => $standardProduct->id
+            ],
+            [
+                "package_description" => $request->premium["description"],
+                "days_to_completion" => $request->premium["delivery"],
+                "revision_count" => $request->premium["revision"],
+                "price" => $request->premium["price"],
+                "product_id" => $premiumProduct->id
+            ],
+            ],["product_id"], ["package_description", "days_to_completion", "revision_count", "price"]);
+
+            $basicPackageId = $basicProduct->package->id;
+            $standardPackageId = $standardProduct->package->id;
+            $premiumPackageId = $premiumProduct->package->id;
+
+            foreach ($request->basic["attributes"] as $attribute){
+                $basicAttributes[] = [
+                    "spec" => $attribute["title"],
+                    "package_spec_detail_value" => $attribute['value'],
+                    'package_spec_id' => $attribute["attributeId"],
+                    'package_id' => $basicPackageId
+                ];
+            }
+            foreach ($request->standard["attributes"] as $attribute){
+                $standardAttributes[] = [
+                    "spec" => $attribute["title"],
+                    "package_spec_detail_value" => $attribute['value'],
+                    'package_spec_id' => $attribute["attributeId"],
+                    'package_id' => $standardPackageId
+                ];
+            }
+            foreach ($request->premium["attributes"] as $attribute){
+                $premiumAttributes[] = [
+                    "spec" => $attribute["title"],
+                    "package_spec_detail_value" => $attribute['value'],
+                    'package_spec_id' => $attribute["attributeId"],
+                    'package_id' => $premiumPackageId
+                ];
+            }
+
+            $mainAttributes = array_merge($basicAttributes, $standardAttributes, $premiumAttributes);
+            // dd($basicAttributes);
+
+            PackageSpecDetails::upsert($mainAttributes, ["package_spec_id", "package_id"], ["package_spec_detail_value"]);
+
+            // $attributes = PackageSpec::
+        } else if($request->basic != null) {
+            $basicProduct = Product::firstOrCreate([
+                "gig_id" => $gig->id, "product_title" => "basic"
+            ]);
+            $basicPackageId = $basicProduct->package->id;
+
+
+            Product::whereIn("product_title", ["premium", "standard"])->delete();
+            $basic = $request['basic'];
+            Packages::upsert([
+                [
+                    "package_description" => $basic["description"],
+                    "days_to_completion" => $basic["delivery"],
+                    "revision_count" => $basic["revision"],
+                    "price" => $basic["price"],
+                    "product_id" => $basicProduct->id
+                ],], ["product_id"], ["package_description", "days_to_completion", "revision_count", "price"]);
+
+            foreach ($request->basic["attributes"] as $attribute){
+                    $basicAttributes[] = [
+                        "spec" => $attribute["title"],
+                        "package_spec_detail_value" => $attribute['value'],
+                        'package_spec_id' => $attribute["attributeId"],
+                        'package_id' => $basicPackageId
+                    ];
+                }
+
+                PackageSpecDetails::upsert($basicAttributes, ["package_spec_id", "package_id"], ["package_spec_detail_value"]);
+        }
+        $gig->save();
+        return response(["message" => "success", "premium" => $premiumProduct, "req" => $request->basic]);
+    }
+
+    public function deactivate(Request $request, $gigId ){
+        $gig = Gig::find($gigId);
+        $statusDetails = $gig->statusDetails;
+        $statusDetails->status = 'paused';
+        $statusDetails->save();
+        return response(["message" => "success"]);
+    }
+
+    public function activate(Request $request, $gigId ){
+        $gig = Gig::find($gigId);
+        $statusDetails = $gig->statusDetails;
+        $statusDetails->status = 'active';
+        $statusDetails->save();
+        return response(["message" => "success"]);
+    }
+
+    public function delete(Request $request, $gigId ){
+        Gig::find($gigId)->delete();
+        return response(["message" => "success"]);
     }
 
 }
