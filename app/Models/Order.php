@@ -19,7 +19,7 @@ class Order extends Model
 
     public function items(){
         $gigExtra = $this->hasMany(GigExtra::class);
-        $gigPackage = $this->hasOne(Packages::class);
+        $gigPackage = $this->hasOne(Package::class);
         // $gigPackage = $this->hasOne(::class);
         return [$gigExtra, $gigPackage];
     }

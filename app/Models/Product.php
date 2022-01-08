@@ -14,6 +14,7 @@ class Product extends Model
     ];
 
     public function package(){
-        return $this->hasOne(Packages::class);
+        return $this->hasOne(Package::class);
     }
+
 }

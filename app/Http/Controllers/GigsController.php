@@ -4,12 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\GigResource;
 use App\Http\Resources\GigStatusResource;
+use App\Http\Resources\ProductResource;
 use App\Models\Gig;
+use App\Models\GigExtra;
 use App\Models\User;
 use App\Models\GigStatus;
 use App\Models\GigStatusDetail;
 use App\Models\GigTags;
-use App\Models\Packages;
+use App\Models\Package;
 use App\Models\PackageSpec;
 use App\Models\PackageSpecDetails;
 use App\Models\Product;
@@ -88,13 +90,22 @@ class GigsController extends Controller
 
         try{
             $gig = Gig::find($gigId);
+            $basicProduct = $gig->product->where("product_title", "basic")->first();
+            $standardProduct = $gig->product->where("product_title", "standard")->first();
+            $premiumProduct = $gig->product->where("product_title", "premium")->first();
+            $gigextras = $gig->gigExtras;
             $response = [
                 "id" => $gig->id,
                 "title" => $gig->title,
                 "description" => $gig->description,
                 "requirements" => $gig->requirements,
                 "gigTags" => $gig->tags,
-                "packages" => $gig->packages,
+                "packages" => [
+                    "basic" =>  $basicProduct != null ? new ProductResource($basicProduct) : null,
+                    "standard" =>  $standardProduct != null ? new ProductResource($standardProduct) : null,
+                    "premium" =>  $premiumProduct != null ? new ProductResource($premiumProduct) : null,
+                ],
+                "gigExtras" => $gigextras,
                 "gallery" => $gig->gallery,
                 "subCategory"=>$gig->subCategory,
                 "status" => $gig->statusDetails->status,
@@ -130,8 +141,6 @@ class GigsController extends Controller
         // if they are in the package form it should take the values
         // and store them
 
-        $product = Product::whereIn('product_title', ["basic", "standard", "premium",])->get();
-
         if ($request->basic != null && $request->standard != null && $request->premium != null){
             $basicProduct = Product::firstOrCreate([
                 "gig_id" => $gig->id, "product_title" => "basic"
@@ -143,7 +152,7 @@ class GigsController extends Controller
                 "gig_id" => $gig->id, "product_title" => "standard"
             ]);
 
-            Packages::upsert([
+            Package::upsert([
             [
                 "package_description" => $request->basic["description"],
                 "days_to_completion" => $request->basic["delivery"],
@@ -206,12 +215,11 @@ class GigsController extends Controller
             $basicProduct = Product::firstOrCreate([
                 "gig_id" => $gig->id, "product_title" => "basic"
             ]);
-            $basicPackageId = $basicProduct->package->id;
 
 
             Product::whereIn("product_title", ["premium", "standard"])->delete();
             $basic = $request['basic'];
-            Packages::upsert([
+            Package::upsert([
                 [
                     "package_description" => $basic["description"],
                     "days_to_completion" => $basic["delivery"],
@@ -219,6 +227,8 @@ class GigsController extends Controller
                     "price" => $basic["price"],
                     "product_id" => $basicProduct->id
                 ],], ["product_id"], ["package_description", "days_to_completion", "revision_count", "price"]);
+
+            $basicPackageId = $basicProduct->package->id;
 
             foreach ($request->basic["attributes"] as $attribute){
                     $basicAttributes[] = [
@@ -231,8 +241,35 @@ class GigsController extends Controller
 
                 PackageSpecDetails::upsert($basicAttributes, ["package_spec_id", "package_id"], ["package_spec_detail_value"]);
         }
+
+        $countextra = $request->extras ?? [];
+        if(count($countextra) != 0){
+            $gigextras = $gig->gigExtras;
+            if (count($gigextras) != 0 ){
+                foreach ($gigextras as $extraProduct){
+                    $productIds[] = [
+                        $extraProduct->product_id
+                    ];
+                }
+                Product::destroy($productIds);
+            }
+            foreach ($request->extras as $extra){
+                $product = Product::firstOrCreate([
+                    "gig_id" => $gig->id, "product_title" => $extra['title']]);
+                $extras[] = [
+                    "gig_extra_title" => $extra["title"],
+                    'price' => $extra['price'],
+                    'additional_days' => $extra['additionalDays'],
+                    'custom_extra' => $extra['custom'],
+                    'product_id' => $product->id,
+                    'gig_id' => $gig->id
+                ];
+            }
+            GigExtra::insert($extras);
+        }
+
         $gig->save();
-        return response(["message" => "success", "premium" => $premiumProduct, "req" => $request->basic]);
+        return response(["message" => $gig->gigExtras]);
     }
 
     public function deactivate(Request $request, $gigId ){

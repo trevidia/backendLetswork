@@ -34,7 +34,7 @@ class Gig extends Model
     }
 
     public function packages(){
-        return $this->hasManyThrough(Packages::class, Product::class);
+        return $this->hasManyThrough(Package::class, Product::class);
     }
 
     public function views(){

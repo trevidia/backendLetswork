@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\PackageSpecDetails;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class ProductResource extends JsonResource
@@ -14,6 +15,10 @@ class ProductResource extends JsonResource
      */
     public function toArray($request)
     {
-        return parent::toArray($request);
+        return [
+            'title' => $this->product_title,
+            "package" => $this->package,
+            "attribute" => $this->package != null ? $this->package->attributes : null
+        ];
     }
 }

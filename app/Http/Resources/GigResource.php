@@ -15,13 +15,14 @@ class GigResource extends JsonResource
      */
     public function toArray($request)
     {
+        $product = $this->product->where('product_title', "basic")->first();
         return [
             'id' => $this->id,
             'title' => $this->title,
             'gig_description' => $this->description,
             'requrements' => $this->requirements,
             'slug' => $this->slug,
-            'packages' => ProductResource::collection($this->whenLoaded('product')),
+            'price' => $product != null ? $product->package->price : null,
             'views' => ViewResource::collection($this->whenLoaded('views')),
             'orders' => OrderResource::collection($this->whenLoaded('orders')),
             'gig_extras' => GigExtraResource::collection($this->whenLoaded('gigExtras')),
