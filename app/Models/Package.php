@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Packages extends Model
+class Package extends Model
 {
     use HasFactory;
       /**
@@ -14,6 +14,10 @@ class Packages extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'package_description','days_to_completion','revision_count','price',
+        'package_description','days_to_completion','revision_count','price','product_id'
     ];
+
+    public function attributes(){
+        return $this->hasMany(PackageSpecDetails::class);
+    }
 }

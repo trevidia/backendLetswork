@@ -15,6 +15,6 @@ class PackageSpecDetails extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'spec','package_spec_detail_value','package_spec_id','gig_id'
+        'spec','package_spec_detail_value','package_spec_id','package_id'
     ];
 }

@@ -19,7 +19,8 @@ class CreatePackageSpecDetailsTable extends Migration
             $table->string('spec');
             $table->string('package_spec_detail_value');
             $table->foreignId('package_spec_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
-            $table->foreignId('gig_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
+            $table->foreignId('package_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
+            $table->unique(['package_spec_id', "package_id"]);
             $table->timestamps();
         });
     }

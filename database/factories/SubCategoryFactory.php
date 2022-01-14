@@ -21,7 +21,7 @@ class SubCategoryFactory extends Factory
             'description' => $this->faker->text(),
             'image_url'=> $this->faker->imageUrl(),
             'slug' => $this->faker->slug(),
-            'category_id' => mt_rand(1,8)
+            'category_id' => mt_rand(1,4)
             //
         ];
     }

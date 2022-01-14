@@ -2,9 +2,10 @@
 
 namespace App\Http\Resources;
 
+use App\Models\PackageSpecDetails;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class GigStatusResource extends JsonResource
+class ProductResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -15,9 +16,9 @@ class GigStatusResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'id' => $this->id,
-            'status' => $this->status,
-            'gigs' => GigResource::collection($this->whenLoaded('gigs')),
+            'title' => $this->product_title,
+            "package" => $this->package,
+            "attribute" => $this->package != null ? $this->package->attributes : null
         ];
     }
 }

@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateGigStatusesTable extends Migration
+class CreateOrdersTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,10 @@ class CreateGigStatusesTable extends Migration
      */
     public function up()
     {
-        Schema::create('gig_statuses', function (Blueprint $table) {
+        Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->string('status');
+            $table->string('order_number');
+            $table->foreignId('product_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
             $table->timestamps();
         });
     }
@@ -27,6 +28,6 @@ class CreateGigStatusesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('gig_statuses');
+        Schema::dropIfExists('orders');
     }
 }
