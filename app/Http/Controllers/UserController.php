@@ -18,7 +18,7 @@ class UserController extends Controller
      */
     public function index()
     {
-
+        return response(User::all());
     }
 
     /**
@@ -70,6 +70,24 @@ class UserController extends Controller
     {
         //
     }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  string  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function showUser($username)
+    {
+        //
+        // return response(gettype($username));
+        $user = User::where('username', $username)->get()->first();
+
+        return $user;
+    }
+
+
+    
 
     /**
      * Show the form for editing the specified resource.

@@ -10,8 +10,8 @@ class GigGallery extends Model
     use HasFactory;
 
     protected $fillable = [
-        'image1_location', 'image2_location', 'image3_location', 'location', 'gig_id'
+        'image1_location', 'image2_location', 'image3_location', 'video_location', 'gig_id'
     ];
 
-    
+
 }

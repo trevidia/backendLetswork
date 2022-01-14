@@ -7,6 +7,8 @@ use App\Http\Resources\GigStatusResource;
 use App\Http\Resources\ProductResource;
 use App\Models\Gig;
 use App\Models\GigExtra;
+use App\Models\GigFAQ;
+use App\Models\GigGallery;
 use App\Models\User;
 use App\Models\GigStatus;
 use App\Models\GigStatusDetail;
@@ -100,6 +102,7 @@ class GigsController extends Controller
                 "description" => $gig->description,
                 "requirements" => $gig->requirements,
                 "gigTags" => $gig->tags,
+                "gigFaqs" => $gig->gigFaqs,
                 "packages" => [
                     "basic" =>  $basicProduct != null ? new ProductResource($basicProduct) : null,
                     "standard" =>  $standardProduct != null ? new ProductResource($standardProduct) : null,
@@ -125,6 +128,7 @@ class GigsController extends Controller
         $gig->description = $request['description'] ?? $gig->description;
         $gig->slug = $request['gigTitle'] != null ? Str::snake($request['gigTitle']) : $gig->slug ;
         $tags = $request['tags'] ?? $gig->tags;
+        $faqs = $request['faqs'] ?? $gig->gigFaqs;
 
         // if the count of the gig tags aren't zero then
         // create tags after deleting them
@@ -136,6 +140,21 @@ class GigsController extends Controller
                     ["tag_title" => $tag, 'gig_id' => $gigId]
                 );
             }
+        }
+
+        // if the count of the faqs aren't zero then create faqs
+        // after deleting all the faqs
+
+        if (count($faqs) != 0 && $request['faqs'] != null){
+            GigFAQ::where('gig_id', $gigId)->delete();
+            foreach ($faqs as $faq){
+                $faqArray[] = [
+                    'question' => $faq['question'],
+                    'answer'=> $faq['answer'],
+                    'gig_id'=> $gig->id
+                ];
+            }
+            GigFAQ::insert($faqArray);
         }
 
         // if they are in the package form it should take the values
@@ -277,6 +296,51 @@ class GigsController extends Controller
         $statusDetails = $gig->statusDetails;
         $statusDetails->status = 'paused';
         $statusDetails->save();
+        return response(["message" => "success"]);
+    }
+
+    public function saveImages(Request $request, $gigId){
+        $gig = Gig::find($gigId);
+
+        $storageFolder = 'images/gigImages';
+        if ( $request->hasFile('gig_image1') && $request->file('gig_image1')->isValid()){
+            $fileName = $request->file('gig_image1')->getClientOriginalName();
+            $path = $request->file('gig_image1')->storeAs($storageFolder, $fileName);
+            if ($gig->gallery == null){
+                GigGallery::create([
+                    'image1_location' => $path,
+                    "gig_id" => $gig->id
+                ]);
+            } else{
+                $gig->gallery->image1_location = $path;
+            }
+            $gig->gallery->save();
+            return (["path" => $path]);
+        }
+        if ($request->hasFile('gig_image2') && $request->file('gig_image2')->isValid()){
+            $fileName = $request->file('gig_image2')->getClientOriginalName();
+            $path = $request->file('gig_image2')->storeAs($storageFolder, $fileName);
+            $gig->gallery->image2_location = $path;
+            $gig->gallery->save();
+            return response(["path"=> $path]);
+        }
+        if ($request->hasFile('gig_image3') && $request->file('gig_image3')->isValid()){
+            $fileName = $request->file('gig_image3')->getClientOriginalName();
+            $path = $request->file('gig_image3')->storeAs($storageFolder, $fileName);
+            $gig->gallery->image3_location = $path;
+            $gig->gallery->save();
+            return response(["path"=> $path]);
+        }
+
+        if ($request->hasFile('video') && $request->file('video')->isValid()){
+            $fileName = $request->file('video')->getClientOriginalName();
+            $path = $request->file('video')->storeAs("videos/" . $gigId, $fileName);
+            $gig->gallery->video_location = $path;
+            $gig->gallery->save();
+            return response(["path"=> $path]);
+        }
+        // $fileName = $request->file('gig_image1')->getClientOriginalName();
+        // $path = $request->file('gig_image1')->store('gigImages');
         return response(["message" => "success"]);
     }
 

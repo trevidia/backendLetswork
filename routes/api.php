@@ -26,6 +26,10 @@ Route::middleware('auth:sanctum')->group(function (){
     });
     Route::put('/user/{user}', [UserController::class, "update"]);
 });
+
+Route::get('/users', [UserController::class, 'index']);
+Route::get('/user/{username}', [UserController::class, 'showUser']);
+
 Route::post('/login', [UserController::class, "store"]);
 
 Route::resource('package_spec', PackageSpecController::class);
@@ -35,6 +39,7 @@ Route::post('/logout', [UserController::class, "logout"]);
 Route::get('/user_gigs/{user}', [GigsController::class, "proposalStatus"]);
 Route::get('/gig/{gigId}', [GigsController::class, "view"]);
 Route::patch('/gig/{gigId}', [GigsController::class, "updateGig"]);
+Route::post('/gig_image/{gigId}', [GigsController::class, "saveImages"]);
 Route::patch('/deactivate_gig/{gigId}', [GigsController::class, "deactivate"]);
 Route::patch('/activate_gig/{gigId}', [GigsController::class, "activate"]);
 Route::delete('/delete_gig/{gigId}', [GigsController::class, "delete"]);
