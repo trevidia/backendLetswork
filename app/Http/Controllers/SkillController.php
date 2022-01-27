@@ -15,6 +15,7 @@ class SkillController extends Controller
     public function index()
     {
         //
+        return response(Skill::paginate(10));
     }
 
     /**
@@ -35,7 +36,10 @@ class SkillController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        Skill::firstOrCreate([
+            "skill_title" => $request->skillTitle
+        ]);
+        return response(["message" => "success"]);
     }
 
     /**
@@ -44,9 +48,9 @@ class SkillController extends Controller
      * @param  \App\Models\Skill  $skill
      * @return \Illuminate\Http\Response
      */
-    public function show(Skill $skill)
+    public function show($skill)
     {
-        //
+        return response(Skill::find($skill));
     }
 
     /**
@@ -67,9 +71,12 @@ class SkillController extends Controller
      * @param  \App\Models\Skill  $skill
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Skill $skill)
+    public function update(Request $request, $skill)
     {
-        //
+        $currentSkill = Skill::find($skill);
+        $currentSkill->skill_title = $request->skillTitle;
+        $currentSkill->save();
+        return response(["message"=>"success"]);
     }
 
     /**
@@ -78,8 +85,9 @@ class SkillController extends Controller
      * @param  \App\Models\Skill  $skill
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Skill $skill)
+    public function destroy($skill)
     {
-        //
+        Skill::destroy($skill);
+        return response(["message" => "success"]);
     }
 }

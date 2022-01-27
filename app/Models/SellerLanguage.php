@@ -8,4 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class SellerLanguage extends Model
 {
     use HasFactory;
+    protected $fillable = [
+        "language", "level", "users_id"
+    ];
 }

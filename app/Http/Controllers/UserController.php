@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\GigStatusDetailResource;
+use App\Http\Resources\UserGigResource;
+use App\Models\GigStatusDetail;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -83,11 +86,31 @@ class UserController extends Controller
         // return response(gettype($username));
         $user = User::where('username', $username)->get()->first();
 
-        return $user;
+        // :Todo: would create a rating table once order table has been sorted
+        // And location attribute would be given to users as a whole
+        // not only sellers
+        $info = $user->info;
+        $response = [
+            "image_url" => $user->image_url,
+            "username" => $user->username,
+            "about_user" => $info == null ? null : $info->seller_label,
+            "ratings" => null,
+            "location" => $info == null ? null : $info->location,
+            "recent_delivery" => $info == null ? null : $info->recent_delivery,
+            "description" => $info == null ? null : $info->description,
+            "languages" => $user->languages,
+            "skills" => $user->skills,
+            // "gigs" => GigStatusDetailResource::collection(GigStatusDetail::with('gig')->where("status", "active")->get()),
+            "gigs" => UserGigResource::collection($user->gigs),
+            "seller_level"=>  $info == null ? null : $info->seller_level,
+            "date_joined" => date("F",$user->created_at->month). " ". $user->created_at->day. ", ". $user->created_at->year
+        ];
+
+        return response($response);
     }
 
 
-    
+
 
     /**
      * Show the form for editing the specified resource.

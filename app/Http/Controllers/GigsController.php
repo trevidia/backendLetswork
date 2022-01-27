@@ -39,13 +39,12 @@ class GigsController extends Controller
             'sub_category_id' => $request['subCategoryId'],
             'description' => $request['description'],
             'requirements'=> $request['requirements'],
-            'slug' => Str::snake($request['gigTitle']),
+            'slug' => Str::slug($request['gigTitle'], "_"),
             'user_id'=> $request['userId'],
         ]);
         GigStatusDetail::firstOrCreate(
             ['gig_id' => $gig->id],
-            ['status' => 'draft'
-        ]);
+            ['status' => 'draft']);
 
         $tags = $request['tags'];
         foreach ($tags as $tag){
@@ -65,6 +64,15 @@ class GigsController extends Controller
      */
     public function createProduct(Request $request){
         //
+    }
+
+    public function sellGig($gigSlug){
+        return response(Gig::where('slug', $gigSlug)->first());
+    }
+
+    public function index()
+    {
+        return response(Gig::with('user')->get());
     }
 
      /**
@@ -199,29 +207,37 @@ class GigsController extends Controller
             $standardPackageId = $standardProduct->package->id;
             $premiumPackageId = $premiumProduct->package->id;
 
-            foreach ($request->basic["attributes"] as $attribute){
-                $basicAttributes[] = [
-                    "spec" => $attribute["title"],
-                    "package_spec_detail_value" => $attribute['value'],
-                    'package_spec_id' => $attribute["attributeId"],
-                    'package_id' => $basicPackageId
-                ];
+            if ($request->basic["attributes"] != null){
+                foreach ($request->basic["attributes"] as $attribute){
+                    $basicAttributes[] = [
+                        "spec" => $attribute["title"],
+                        "package_spec_detail_value" => $attribute['value'],
+                        'package_spec_id' => $attribute["attributeId"],
+                        'package_id' => $basicPackageId
+                    ];
+                }
             }
-            foreach ($request->standard["attributes"] as $attribute){
-                $standardAttributes[] = [
-                    "spec" => $attribute["title"],
-                    "package_spec_detail_value" => $attribute['value'],
-                    'package_spec_id' => $attribute["attributeId"],
-                    'package_id' => $standardPackageId
-                ];
+
+            if ($request->standard["attributes"] != null){
+                foreach ($request->standard["attributes"] as $attribute){
+                    $standardAttributes[] = [
+                        "spec" => $attribute["title"],
+                        "package_spec_detail_value" => $attribute['value'],
+                        'package_spec_id' => $attribute["attributeId"],
+                        'package_id' => $standardPackageId
+                    ];
+                }
             }
-            foreach ($request->premium["attributes"] as $attribute){
-                $premiumAttributes[] = [
-                    "spec" => $attribute["title"],
-                    "package_spec_detail_value" => $attribute['value'],
-                    'package_spec_id' => $attribute["attributeId"],
-                    'package_id' => $premiumPackageId
-                ];
+
+            if ($request->premium["attributes"] != null){
+                foreach ($request->premium["attributes"] as $attribute){
+                    $premiumAttributes[] = [
+                        "spec" => $attribute["title"],
+                        "package_spec_detail_value" => $attribute['value'],
+                        'package_spec_id' => $attribute["attributeId"],
+                        'package_id' => $premiumPackageId
+                    ];
+                }
             }
 
             $mainAttributes = array_merge($basicAttributes, $standardAttributes, $premiumAttributes);
@@ -249,16 +265,18 @@ class GigsController extends Controller
 
             $basicPackageId = $basicProduct->package->id;
 
+          if ($request->basic["attributes"] != null){
             foreach ($request->basic["attributes"] as $attribute){
-                    $basicAttributes[] = [
-                        "spec" => $attribute["title"],
-                        "package_spec_detail_value" => $attribute['value'],
-                        'package_spec_id' => $attribute["attributeId"],
-                        'package_id' => $basicPackageId
-                    ];
-                }
+                $basicAttributes[] = [
+                    "spec" => $attribute["title"],
+                    "package_spec_detail_value" => $attribute['value'],
+                    'package_spec_id' => $attribute["attributeId"],
+                    'package_id' => $basicPackageId
+                ];
+            }
 
-                PackageSpecDetails::upsert($basicAttributes, ["package_spec_id", "package_id"], ["package_spec_detail_value"]);
+            PackageSpecDetails::upsert($basicAttributes, ["package_spec_id", "package_id"], ["package_spec_detail_value"]);
+          }
         }
 
         $countextra = $request->extras ?? [];
@@ -341,7 +359,7 @@ class GigsController extends Controller
         }
         // $fileName = $request->file('gig_image1')->getClientOriginalName();
         // $path = $request->file('gig_image1')->store('gigImages');
-        return response(["message" => "success"]);
+        return response(["message" => "Image isn't valid check the size"], 403);
     }
 
     public function activate(Request $request, $gigId ){

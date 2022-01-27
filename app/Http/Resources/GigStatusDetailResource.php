@@ -15,12 +15,10 @@ class GigStatusDetailResource extends JsonResource
      */
     public function toArray($request)
     {
-        // return [
-        //     'gig' => new GigResource($this->whenLoaded('gig')),
-        //     'message' => $this->message,
-        //     'status' => $this->status
-        // ];
-        return parent::toArray($request);
+        return [
+            'gig' => new GigResource($this->whenLoaded('gig')),
+            'status' => $this->status
+        ];
     }
-    
+
 }

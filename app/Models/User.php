@@ -53,4 +53,16 @@ class User extends Authenticatable
     public function orders(){
 
     }
+
+    public function info(){
+        return $this->hasOne(SellerInfo::class, "users_id");
+    }
+
+    public function languages(){
+        return $this->hasMany(SellerLanguage::class, "users_id");
+    }
+
+    public function skills(){
+        return $this->hasOne(SellerSkill::class, "users_id");
+    }
 }

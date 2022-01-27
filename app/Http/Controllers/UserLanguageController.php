@@ -14,7 +14,7 @@ class UserLanguageController extends Controller
      */
     public function index()
     {
-        //
+        return response(UserLanguage::paginate(10));
     }
 
     /**
@@ -35,7 +35,10 @@ class UserLanguageController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        UserLanguage::firstOrCreate([
+            "language"=> $request->sellerLanguage
+        ]);
+        return response(["message"=>"success"]);
     }
 
     /**
@@ -44,9 +47,10 @@ class UserLanguageController extends Controller
      * @param  \App\Models\UserLanguage  $userLanguage
      * @return \Illuminate\Http\Response
      */
-    public function show(UserLanguage $userLanguage)
+    public function show($userLanguage)
     {
         //
+        return response(UserLanguage::find($userLanguage));
     }
 
     /**
@@ -64,12 +68,14 @@ class UserLanguageController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\UserLanguage  $userLanguage
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, UserLanguage $userLanguage)
+    public function update(Request $request, $id)
     {
-        //
+        $userLanguage = UserLanguage::find($id);
+        $userLanguage->language = $request->sellerLanguage;
+        $userLanguage->save();
+        return response(["message" => $id]);
     }
 
     /**
@@ -78,8 +84,10 @@ class UserLanguageController extends Controller
      * @param  \App\Models\UserLanguage  $userLanguage
      * @return \Illuminate\Http\Response
      */
-    public function destroy(UserLanguage $userLanguage)
+    public function destroy($userLanguage)
     {
         //
+        UserLanguage::find($userLanguage)->delete();
+        return response(["message"=>"success"]);
     }
 }

@@ -20,6 +20,7 @@ class CreateSellerInfosTable extends Migration
             $table->string('seller_level')->nullable();
             $table->string('location')->nullable();
             $table->date('recent_delivery')->nullable();
+            $table->foreignId('sub_category_id')->nullable()->constrained()->cascadeOnUpdate()->cascadeOnDelete();
             $table->foreignId('users_id')->unique()->constrained()->cascadeOnUpdate()->cascadeOnDelete();
             $table->timestamps();
         });

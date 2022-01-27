@@ -8,4 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class SellerSkill extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        "seller_skill_title", "level", "users_id"
+    ];
 }
